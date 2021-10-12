@@ -8,6 +8,10 @@
     <artifactId>labjunit5</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <properties>
+        <project.build.sourceEncodig>UTF-8</project.build.sourceEncodig>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

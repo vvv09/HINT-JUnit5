@@ -13,6 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS) //-чтобы не делать @BeforeAll / @AfterAll статичными
+@Tag("fast")
+@Tag("user")
 class UserServiceTest {
 
     private static final User IVAN = User.of(1, "Ivan", "123");
@@ -42,17 +44,6 @@ class UserServiceTest {
     }
 
     @Test
-    void throw_exception_if_username_or_password_is_null() {
-        assertAll(
-                () -> {
-                    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.login(null, IVAN.getPassword()));
-                    assertThat(exception.getMessage()).isEqualTo("username or password is null");
-                },
-                () -> assertThrows(IllegalArgumentException.class, ()-> userService.login(IVAN.getUsername(), null))
-        );
-    }
-
-    @Test
     void user_size_when_user_added() {
         System.out.println("Test 2: " + this);
         userService.add(IVAN);
@@ -64,17 +55,7 @@ class UserServiceTest {
 //        assertEquals(2, users.size(), () -> "Список пользователей должен содержать 2 элемента");
     }
 
-    @Test
-    void login_success_if_user_exists(){
-        userService.add(IVAN);
-        Optional<User> requestedUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
 
-        assertThat(requestedUser).isPresent();
-        requestedUser.ifPresent(user -> assertThat(user).isEqualTo(IVAN));
-
-//        assertTrue(requestedUser.isPresent(), () -> "Должен вернуться существующий пользователь");
-//        requestedUser.ifPresent(user -> assertEquals(IVAN, user, () -> "Должен вернуться конкретный пользователь"));
-    }
 
     @Test
     void users_converted_to_map_by_id(){
@@ -89,22 +70,55 @@ class UserServiceTest {
 
     }
 
-    @Test
-    void login_fail_if_password_not_correct(){
-        userService.add(IVAN);
+    @Nested
+    @Tag("login")
+    class LoginTest {
 
-        Optional<User> requestedUser = userService.login(IVAN.getUsername(), "wrong_password");
+        @Test
+        @DisplayName("Если пользователь существует, то логин успешный")
+        void login_success_if_user_exists(){
+            userService.add(IVAN);
+            Optional<User> requestedUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
 
-        assertTrue(requestedUser.isEmpty(), () -> "Пользователь не должен вернуться");
-    }
+            assertThat(requestedUser).isPresent();
+            requestedUser.ifPresent(user -> assertThat(user).isEqualTo(IVAN));
 
-    @Test
-    void login_fail_if_user_does_not_exist(){
-        userService.add(IVAN);
+//        assertTrue(requestedUser.isPresent(), () -> "Должен вернуться существующий пользователь");
+//        requestedUser.ifPresent(user -> assertEquals(IVAN, user, () -> "Должен вернуться конкретный пользователь"));
+        }
 
-        Optional<User> requestedUser = userService.login("Anton", IVAN.getPassword());
+        @Test
+        @DisplayName("Если пароль не верный, то логин не проходит")
+        void login_fail_if_password_not_correct(){
+            userService.add(IVAN);
 
-        assertTrue(requestedUser.isEmpty(), () -> "Пользователь не должен вернуться");
+            Optional<User> requestedUser = userService.login(IVAN.getUsername(), "wrong_password");
+
+            assertTrue(requestedUser.isEmpty(), () -> "Пользователь не должен вернуться");
+        }
+
+        @Test
+        @DisplayName("Если пользователь не существует, то логин не проходит")
+        void login_fail_if_user_does_not_exist(){
+            userService.add(IVAN);
+
+            Optional<User> requestedUser = userService.login("Anton", IVAN.getPassword());
+
+            assertTrue(requestedUser.isEmpty(), () -> "Пользователь не должен вернуться");
+        }
+
+        @Test
+        @DisplayName("Если имя пользователя или пароль равны null, то бросается IllegalArgumentException с сообщением \"username or password is null\"")
+        void throw_exception_if_username_or_password_is_null() {
+            assertAll(
+                    () -> {
+                        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.login(null, IVAN.getPassword()));
+                        assertThat(exception.getMessage()).isEqualTo("username or password is null");
+                    },
+                    () -> assertThrows(IllegalArgumentException.class, ()-> userService.login(IVAN.getUsername(), null))
+            );
+        }
+
     }
 
     @AfterEach
