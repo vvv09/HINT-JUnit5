@@ -4,10 +4,11 @@ import com.valunskii.labjunit5.dto.User;
 import org.junit.jupiter.api.*;
 
 import javax.crypto.spec.IvParameterSpec;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS) //-чтобы не делать @BeforeAll / @AfterAll статичными
 class UserServiceTest {
@@ -43,7 +44,8 @@ class UserServiceTest {
 
         var users = userService.getAll();
 
-        assertEquals(2, users.size(), () -> "Список пользователей должен содержать 2 элемента");
+        assertThat(users).hasSize(2);
+//        assertEquals(2, users.size(), () -> "Список пользователей должен содержать 2 элемента");
     }
 
     @Test
@@ -51,9 +53,24 @@ class UserServiceTest {
         userService.add(IVAN);
         Optional<User> requestedUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
 
-        assertTrue(requestedUser.isPresent(), () -> "Должен вернуться существующий пользователь");
+        assertThat(requestedUser).isPresent();
+        requestedUser.ifPresent(user -> assertThat(user).isEqualTo(IVAN));
 
-        requestedUser.ifPresent(user -> assertEquals(IVAN, user, () -> "Должен вернуться конкретный пользователь"));
+//        assertTrue(requestedUser.isPresent(), () -> "Должен вернуться существующий пользователь");
+//        requestedUser.ifPresent(user -> assertEquals(IVAN, user, () -> "Должен вернуться конкретный пользователь"));
+    }
+
+    @Test
+    void users_converted_to_map_by_id(){
+        userService.add(IVAN, PETR);
+
+        Map<Integer, User> users = userService.getAllConvertedById();
+
+        assertAll(
+                () -> assertThat(users).containsKeys(IVAN.getId(), PETR.getId()),
+                () -> assertThat(users).containsValues(IVAN, PETR)
+        );
+
     }
 
     @Test

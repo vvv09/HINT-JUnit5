@@ -9,4 +9,8 @@ public class User {
     Integer id;
     String username;
     String password;
+
+    public Integer getUsersId() { // ломбоковский геттер почему-то не работает
+        return id;
+    }
 }
