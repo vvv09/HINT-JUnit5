@@ -1,6 +1,8 @@
 package com.valunskii.labjunit5.service;
 
 import com.valunskii.labjunit5.dto.User;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.*;
 
 import javax.crypto.spec.IvParameterSpec;
@@ -33,6 +35,9 @@ class UserServiceTest {
     void users_empty_if_no_user_added() {
         System.out.println("Test 1: " + this);
         var users = userService.getAll();
+
+        MatcherAssert.assertThat(users, IsEmptyCollection.empty());
+
         assertTrue(users.isEmpty(), () -> "Список пользователей должен быть пустой");
     }
 
