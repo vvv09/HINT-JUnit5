@@ -42,6 +42,17 @@ class UserServiceTest {
     }
 
     @Test
+    void throw_exception_if_username_or_password_is_null() {
+        assertAll(
+                () -> {
+                    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.login(null, IVAN.getPassword()));
+                    assertThat(exception.getMessage()).isEqualTo("username or password is null");
+                },
+                () -> assertThrows(IllegalArgumentException.class, ()-> userService.login(IVAN.getUsername(), null))
+        );
+    }
+
+    @Test
     void user_size_when_user_added() {
         System.out.println("Test 2: " + this);
         userService.add(IVAN);
