@@ -2,6 +2,7 @@ package com.valunskii.labjunit5.service;
 
 import com.valunskii.labjunit5.dto.User;
 import com.valunskii.labjunit5.paramresilver.UserServiceParamResolver;
+import lombok.RequiredArgsConstructor;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.*;
@@ -10,8 +11,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 
 import javax.crypto.spec.IvParameterSpec;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({
         UserServiceParamResolver.class
 })
+//@Timeout(value = 200, unit = TimeUnit.MILLISECONDS)
 class UserServiceTest {
 
     private static final User IVAN = User.of(1, "Ivan", "123");
@@ -74,10 +78,19 @@ class UserServiceTest {
 //        assertEquals(2, users.size(), () -> "Список пользователей должен содержать 2 элемента");
     }
 
-
-
     @Test
-    void users_converted_to_map_by_id(){
+    @Disabled("flaky, need to see") //flaky, типа "нестабильно работает"
+    void someFlakyTest(){
+
+    }
+
+
+
+    @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
+    @DisplayName("Возвращение списка юзеров в виде мапы")
+    void users_converted_to_map_by_id(RepetitionInfo info){
+        int currentRepetition = info.getCurrentRepetition();
+        int currentRepetition1 = info.getCurrentRepetition();
         userService.add(IVAN, PETR);
 
         Map<Integer, User> users = userService.getAllConvertedById();
@@ -85,8 +98,29 @@ class UserServiceTest {
         assertAll(
                 () -> assertThat(users).containsKeys(IVAN.getId(), PETR.getId()),
                 () -> assertThat(users).containsValues(IVAN, PETR)
+
         );
 
+    }
+
+    @Test
+    @DisplayName("Логин должен отработать за 200 мс, иначе Exception")
+    void checkLoginFunctionalityPerformance() {
+        Optional<User> requestedUser = assertTimeout(Duration.ofMillis(200L), () -> {
+//            Thread.sleep(300L); // - свалится Exception
+            return userService.login(WRONG_USERNAME, IVAN.getPassword());
+        });
+    }
+
+    @Test
+    @DisplayName("Логин должен отработать за 200 мс, иначе Exception (запуск в отдельном потоке)")
+    void checkLoginFunctionalityInStangaloneThredPerformance() {
+        System.out.println(Thread.currentThread().getName());
+        Optional<User> requestedUser = assertTimeoutPreemptively(Duration.ofMillis(200L), () -> {
+            System.out.println(Thread.currentThread().getName()); //другое имя потока, поскольку запустилось в новом потоке
+//            Thread.sleep(300L);
+            return userService.login(WRONG_USERNAME, IVAN.getPassword());
+        });
     }
 
     @Nested
