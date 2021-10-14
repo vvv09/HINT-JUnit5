@@ -6,10 +6,13 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
 
 import javax.crypto.spec.IvParameterSpec;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,6 +27,8 @@ class UserServiceTest {
 
     private static final User IVAN = User.of(1, "Ivan", "123");
     private static final User PETR = User.of(2, "Peter", "111");
+    private static final String WRONG_USERNAME = "dummy";
+    private static final String WRONG_PASSWORD = "dummy";
 
     private UserService userService;
 
@@ -106,7 +111,7 @@ class UserServiceTest {
         void login_fail_if_password_not_correct(){
             userService.add(IVAN);
 
-            Optional<User> requestedUser = userService.login(IVAN.getUsername(), "wrong_password");
+            Optional<User> requestedUser = userService.login(IVAN.getUsername(), WRONG_PASSWORD);
 
             assertTrue(requestedUser.isEmpty(), () -> "Пользователь не должен вернуться");
         }
@@ -116,7 +121,7 @@ class UserServiceTest {
         void login_fail_if_user_does_not_exist(){
             userService.add(IVAN);
 
-            Optional<User> requestedUser = userService.login("Anton", IVAN.getPassword());
+            Optional<User> requestedUser = userService.login(WRONG_USERNAME, IVAN.getPassword());
 
             assertTrue(requestedUser.isEmpty(), () -> "Пользователь не должен вернуться");
         }
@@ -134,6 +139,36 @@ class UserServiceTest {
         }
 
     }
+
+
+    @ParameterizedTest
+//    @ArgumentsSource()
+    /*
+    * Ниже готовые наследники @ArgumentSource, которые можно использовать, если входной параметр один.
+    * */
+//    @NullSource
+//    @ValueSource
+//    @EmptySource
+//    @NullAndEmptySource
+    //Все аннотации можно использовать сразу - каждая по очереди вызовет этот тест
+    @DisplayName("Проверка логина")
+    @MethodSource("com.valunskii.labjunit5.service.UserServiceTest#getArgumentsForLoginParameterizedTest")
+    void loginParameterizedTest(String username, String password, Optional<User> expectedUser) {
+        userService.add(IVAN, PETR);
+        var requestedUser = userService.login(username, password);
+        assertThat(requestedUser).isEqualTo(expectedUser);
+    }
+
+    static Stream<Arguments> getArgumentsForLoginParameterizedTest() {
+        return Stream.of(
+                Arguments.of(IVAN.getUsername(), IVAN.getPassword(), Optional.of(IVAN)),
+                Arguments.of(PETR.getUsername(), PETR.getPassword(), Optional.of(PETR)),
+                Arguments.of(PETR.getUsername(), WRONG_PASSWORD, Optional.empty()),
+                Arguments.of(WRONG_USERNAME, PETR.getPassword(), Optional.empty()),
+                Arguments.of(WRONG_USERNAME, WRONG_PASSWORD, Optional.empty())
+        );
+    }
+
 
     @AfterEach
     void clear() {
