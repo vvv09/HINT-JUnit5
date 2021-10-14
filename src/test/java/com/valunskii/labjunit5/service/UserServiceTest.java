@@ -1,9 +1,11 @@
 package com.valunskii.labjunit5.service;
 
 import com.valunskii.labjunit5.dto.User;
+import com.valunskii.labjunit5.paramresilver.UserServiceParamResolver;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.crypto.spec.IvParameterSpec;
 import java.util.Map;
@@ -15,6 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS) //-чтобы не делать @BeforeAll / @AfterAll статичными
 @Tag("fast")
 @Tag("user")
+@ExtendWith({
+        UserServiceParamResolver.class
+})
 class UserServiceTest {
 
     private static final User IVAN = User.of(1, "Ivan", "123");
@@ -22,15 +27,24 @@ class UserServiceTest {
 
     private UserService userService;
 
+
+    /*
+    *  Пример встроенного в JUnit5 DI
+    *  Если проект не на Spring то почему бы не использовать этот DI ;)
+    */
+    UserServiceTest(TestInfo testInfo) {
+        System.out.println();
+    }
+
     @BeforeAll
     static void beforeAll(){
         System.out.println("Before All");
     }
 
     @BeforeEach
-    void prepare() {
+    void prepare(UserService userService) {
         System.out.println("Before Each: " + this);
-        userService = new UserService();
+        this.userService = userService; //- теперь инжектим
     }
 
     @Test
