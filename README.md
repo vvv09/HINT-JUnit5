@@ -1,5 +1,7 @@
 #JUnit 5
 
+### Основные вещи
+
 -   [Жизненный цикл тестов](https://github.com/vvv09/HINT-JUnit5/commit/372db5827277244f3c853b9d5daec22fe530e638)
 -   [Пример Test Launcher](https://github.com/vvv09/HINT-JUnit5/commit/6a957843c6f3db9e34245389a86cec79160266a1)
 -   [AssertJ](https://github.com/vvv09/HINT-JUnit5/commit/ae18cc786a41ff440b0fef809216d5062d73ec37)
@@ -9,4 +11,8 @@
 -   [Использование встроенного в JUnit 5 DI](https://github.com/vvv09/HINT-JUnit5/commit/42e223ffd639258d024ac3113c942958f5e1a364)
 -   [Использование @ParametrizedTest](https://github.com/vvv09/HINT-JUnit5/commit/34af529fea16824ba346f26fbc3f44942442362e)
 -   [Использование assertTimeout(), @Timeout, @Disabled, @RepeatedTest](https://github.com/vvv09/HINT-JUnit5/commit/fca1da2042b6ea0735dafe4003e73cf9a8e43ba2)
+
+### Тестирование Spring Security
+
+-   [Basic Authentication](https://github.com/vvv09/HINT-JUnit5/commit/f2b6ff0dff689e6bb90b813271306a32cb3de4f3)
 
